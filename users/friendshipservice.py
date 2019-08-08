@@ -6,12 +6,13 @@ import time
 import requests
 from static.constants import TRENDS_URL, FRIENDS_URL, FOLLOWERS_URL
 from static.constants import USER_SEARCH_URL, FRIENDSHIP_CREATE_URL
-from static.constants import FRIENDSHIP_DESTROY_URL
+from static.constants import FRIENDSHIP_DESTROY_URL, TWEET_SEARCH_URL
 from static.logger import logging
 from static.logger import res_err
 import static.env
 
 SCREEN_NAME = os.getenv("auth_user_screen_name")
+
 
 class FriendshipService:
     """
@@ -38,20 +39,29 @@ class FriendshipService:
 
         # perform a user lookup based on the top trends
         # (memcache those users?)
-        user_ids = []
         top_trends = trends[0:3]
         logging.info(f'top trends are: {top_trends}')
-        for trend in top_trends:
-            query = trend["query"]
-            users = self.__fetch_users(query=query)
-            # file = open("mock/users_search_summer_fun.json", "r")
-            # users = json.load(file)
-            # file.close()
-            if not users:
-                continue
-            ids = map(lambda user: user["id"], users)
-            user_ids.extend(ids)
 
+        # look for users who have hardcoded trend information in their profile
+        # user_ids = []
+        # for trend in top_trends:
+        #     query = trend["query"]
+        #     users = self.__fetch_users(query=query)
+        #     # file = open("mock/users_search_summer_fun.json", "r")
+        #     # users = json.load(file)
+        #     # file.close()
+        #     if not users:
+        #         continue
+        #     ids = map(lambda user: user["id"], users)
+        #     user_ids.extend(ids)
+
+        # look for unique users related to the trends
+        trend_query = "%20OR%20".join(
+            map(lambda trend: trend["query"], top_trends))
+        tweets = self.__search_tweets(query=trend_query)
+        user_ids = set()
+        for tweet in tweets:
+            user_ids.add(tweet["user"]["id"])
         logging.info(f'adding {len(user_ids)} friends')
         # follow all those memcached users
         for user_id in user_ids:
@@ -119,6 +129,21 @@ class FriendshipService:
         json = search_res.json()
         logging.info(f'users search with {query} returned {len(json)} results')
         return json
+
+    def __search_tweets(self, query):
+        url = f'{TWEET_SEARCH_URL}?q={query}&count=60'
+        tweets_res = self.session.get(url)
+        res_err(tweets_res, f'searching tweets with query: {query}')
+        if tweets_res.status_code < 200 or tweets_res.status_code > 299:
+            return None
+        tweets = tweets_res.json()["statuses"]
+
+        # file = open("mock/tweets_hello_100.json", "r")
+        # tweets = json.load(file)["statuses"]
+        # file.close()
+        logging.info(
+            f'tweet search with {query} returned {len(tweets)} results')
+        return tweets
 
     def __follow(self, user_id):
         """

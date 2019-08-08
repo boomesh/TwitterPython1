@@ -17,6 +17,8 @@ FRIENDSHIP_DESTROY_URL = f'{ROOT_URL}/{VERSION}/friendships/destroy.json'
 FRIENDS_URL = f'{ROOT_URL}/{VERSION}/friends/list.json'
 FOLLOWERS_URL = f'{ROOT_URL}/{VERSION}/followers/list.json'
 
+TWEET_SEARCH_URL = f'{ROOT_URL}/{VERSION}/search/tweets.json'
+
 STATUS_UPDATE_URL = f'{ROOT_URL}/{VERSION}/statuses/update.json'
 MEDIA_UPLOAD_URL = f'{UPLOAD_URL}/{VERSION}/media/upload.json'
 
