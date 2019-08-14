@@ -18,6 +18,13 @@ FRIENDS_URL = f'{ROOT_URL}/{VERSION}/friends/list.json'
 FOLLOWERS_URL = f'{ROOT_URL}/{VERSION}/followers/list.json'
 
 TWEET_SEARCH_URL = f'{ROOT_URL}/{VERSION}/search/tweets.json'
+TWEET_LIKE_URL = ROOT_URL + "/" + VERSION + "/favorites/create/{tweet_id}.json"
+TWEET_UNLIKE_URL = ROOT_URL + "/" + VERSION + \
+    "favorites/destroy/{tweet_id}.json"
+RETWEET_URL = ROOT_URL + "/" + VERSION + "retweet/create/{tweet_id}.json"
+REMOVE_RETWEET_URL = ROOT_URL + "/" + \
+    VERSION + "unretweet/create/{tweet_id}.json"
+FAVOURITED_TWEETS_URL = ROOT_URL + "/" + VERSION + "/favorites/list.json"
 
 STATUS_UPDATE_URL = f'{ROOT_URL}/{VERSION}/statuses/update.json'
 MEDIA_UPLOAD_URL = f'{UPLOAD_URL}/{VERSION}/media/upload.json'

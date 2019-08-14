@@ -7,6 +7,9 @@ import requests
 from static.constants import TRENDS_URL, FRIENDS_URL, FOLLOWERS_URL
 from static.constants import USER_SEARCH_URL, FRIENDSHIP_CREATE_URL
 from static.constants import FRIENDSHIP_DESTROY_URL, TWEET_SEARCH_URL
+from static.constants import TWEET_LIKE_URL, TWEET_UNLIKE_URL
+from static.constants import RETWEET_URL, REMOVE_RETWEET_URL
+from static.constants import FAVOURITED_TWEETS_URL
 from static.logger import logging
 from static.logger import res_err
 import static.env
@@ -59,16 +62,17 @@ class FriendshipService:
         trend_query = "%20OR%20".join(
             map(lambda trend: trend["query"], top_trends))
         tweets = self.__search_tweets(query=trend_query)
-        user_ids = set()
+        user_tweet_map = {}
         for tweet in tweets:
-            user_ids.add(tweet["user"]["id"])
-        logging.info(f'adding {len(user_ids)} friends')
+            user_tweet_map[tweet["user"]["id"]] = tweet
+        logging.info(f'adding {len(user_tweet_map)} friends')
+        logging.info(f'liking {len(user_tweet_map)} tweets')
         # follow all those memcached users
-        for user_id in user_ids:
+        for user_id, tweet in user_tweet_map.items():
             self.__follow(user_id)
-            # follow once a minute
+            self.__like(tweet)
+            # once a minute
             time.sleep(60)
-        logging.info("friendship create complete")
 
     def purge(self):
         """
@@ -116,6 +120,15 @@ class FriendshipService:
             self.__unfollow(user_id)
             # unfollow once a minute
             time.sleep(60)
+
+        # unfavourite all tweets
+        favourites = self.__favourited_tweets()
+        logging.info(f'unliking {len(favourites)} friends')
+        # unlike all favourited tweets
+        for tweet in favourites:
+            self.__unlike(tweet)
+            # unlike once a minute
+            time.sleep(60)
         logging.info(f'purge completed')
 
     def __fetch_users(self, query):
@@ -145,6 +158,16 @@ class FriendshipService:
             f'tweet search with {query} returned {len(tweets)} results')
         return tweets
 
+    def __favourited_tweets(self):
+        """
+        https://developer.twitter.com/en/docs/tweets/post-and-engage/api-reference/get-favorites-list
+        """
+        response = self.session.post(
+            f'{FAVOURITED_TWEETS_URL}?count=200&screen_name={SCREEN_NAME}')
+        res_err(response, f'fetching favourite tweets')
+        tweets = response.json()
+        return tweets
+
     def __follow(self, user_id):
         """
         https://developer.twitter.com/en/docs/accounts-and-users/follow-search-get-users/api-reference/post-friendships-create
@@ -160,3 +183,35 @@ class FriendshipService:
         destroy_res = self.session.post(
             f'{FRIENDSHIP_DESTROY_URL}?user_id={user_id}')
         res_err(destroy_res, f'unfollowing user: {user_id}')
+
+    def __like(self, tweet):
+        """
+        https://developer.twitter.com/en/docs/tweets/post-and-engage/api-reference/post-favorites-create.html
+        """
+        response = self.session.post(
+            TWEET_LIKE_URL.format(tweet_id=tweet["id"]))
+        res_err(response, f'liking tweet: {tweet}')
+
+    def __unlike(self, tweet):
+        """
+        https://developer.twitter.com/en/docs/tweets/post-and-engage/api-reference/post-favorites-destroy
+        """
+        response = self.session.post(
+            TWEET_UNLIKE_URL.format(tweet_id=tweet["id"]))
+        res_err(response, f'unliking tweet: {tweet}')
+
+    def __retweet(self, tweet):
+        """
+        https://developer.twitter.com/en/docs/tweets/post-and-engage/api-reference/post-statuses-retweet-id
+        """
+        response = self.session.post(
+            RETWEET_URL.format(tweet_id=tweet["id"]))
+        res_err(response, f'retweeting: {tweet}')
+
+    def __unretweet(self, tweet):
+        """
+        https://developer.twitter.com/en/docs/tweets/post-and-engage/api-reference/post-statuses-unretweet-id
+        """
+        response = self.session.post(
+            REMOVE_RETWEET_URL.format(tweet_id=tweet["id"]))
+        res_err(response, f'removing retweet: {tweet}')
