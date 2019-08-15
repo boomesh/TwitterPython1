@@ -76,7 +76,7 @@ class FriendshipService:
 
     def purge(self):
         """
-        remove friends that have not followed back
+        remove friends, unlike tweets of friends that have not followed back
         """
         # fetch friends
         # https://developer.twitter.com/en/docs/accounts-and-users/follow-search-get-users/api-reference/get-friendships-list
@@ -123,7 +123,7 @@ class FriendshipService:
 
         # unfavourite all tweets
         favourites = self.__favourited_tweets()
-        logging.info(f'unliking {len(favourites)} friends')
+        logging.info(f'unliking {len(favourites)} tweets')
         # unlike all favourited tweets
         for tweet in favourites:
             self.__unlike(tweet)
@@ -162,9 +162,11 @@ class FriendshipService:
         """
         https://developer.twitter.com/en/docs/tweets/post-and-engage/api-reference/get-favorites-list
         """
-        response = self.session.post(
+        response = self.session.get(
             f'{FAVOURITED_TWEETS_URL}?count=200&screen_name={SCREEN_NAME}')
         res_err(response, f'fetching favourite tweets')
+        if response.status_code < 200 or response.status_code > 299:
+            return None
         tweets = response.json()
         return tweets
 
@@ -197,7 +199,7 @@ class FriendshipService:
         https://developer.twitter.com/en/docs/tweets/post-and-engage/api-reference/post-favorites-destroy
         """
         response = self.session.post(
-            TWEET_UNLIKE_URL.format(tweet_id=tweet["id"]))
+            f'{TWEET_UNLIKE_URL}?id={tweet["id"]}')
         res_err(response, f'unliking tweet: {tweet}')
 
     def __retweet(self, tweet):
