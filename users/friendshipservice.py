@@ -191,7 +191,7 @@ class FriendshipService:
         https://developer.twitter.com/en/docs/tweets/post-and-engage/api-reference/post-favorites-create.html
         """
         response = self.session.post(
-            TWEET_LIKE_URL.format(tweet_id=tweet["id"]))
+            f'{TWEET_LIKE_URL}?id={tweet["id"]}')
         res_err(response, f'liking tweet: {tweet}')
 
     def __unlike(self, tweet):
