@@ -121,8 +121,8 @@ class FriendshipService:
         # unfollow all those users
         for user_id in users_to_unfollow:
             self.__unfollow(user_id)
-            # unfollow once every 30 seconds
-            time.sleep(30)
+            # unfollow once every 10 seconds
+            time.sleep(10)
 
         # unfavourite all tweets
         favourites = self.__favourited_tweets()
@@ -133,8 +133,8 @@ class FriendshipService:
             # unlike all favourited tweets
             for tweet in favourites:
                 self.__unlike(tweet)
-                # unlike once every 30 seconds
-                time.sleep(30)
+                # unlike once every 10 seconds
+                time.sleep(10)
             favourites = self.__favourited_tweets()
             i = i+1
             time.sleep(1)
