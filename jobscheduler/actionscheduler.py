@@ -25,7 +25,8 @@ class ActionScheduler:  # pylint: disable=too-few-public-methods
 
     def __purge(self):
         """
-        talks to friendship service to remove friends who have not followed back
+        talks to friendship service to remove friends who have not
+        followed back
         """
         self.friendshipservice.purge()
 
@@ -45,22 +46,35 @@ class ActionScheduler:  # pylint: disable=too-few-public-methods
 
         SCHEDULE
         S M T W Th F S
-        c p c c p  c c
+        c   c   c    c
+        c   c   c    c
+        c p c p c  p c
         t t t t t  t t
 
         Using this scheduler:
         https://schedule.readthedocs.io/en/stable/
         """
-        # schedule the create friendships (60 friends max a day, 3PM)
+        # schedule the friendships (100 friends max a day, 3 times a day)
+        schedule.every().sunday.at("09:00").do(self.__create)
         schedule.every().sunday.at("15:00").do(self.__create)
-        schedule.every().tuesday.at("15:00").do(self.__create)
-        schedule.every().wednesday.at("15:00").do(self.__create)
-        schedule.every().friday.at("15:00").do(self.__create)
-        schedule.every().saturday.at("15:00").do(self.__create)
+        schedule.every().sunday.at("21:00").do(self.__create)
 
-        # schedule purge friends (180 removals max, at 11PM)
-        schedule.every().monday.at("20:00").do(self.__purge)
-        schedule.every().thursday.at("20:00").do(self.__purge)
+        schedule.every().tuesday.at("09:00").do(self.__create)
+        schedule.every().tuesday.at("15:00").do(self.__create)
+        schedule.every().tuesday.at("21:00").do(self.__create)
+
+        schedule.every().thursday.at("09:00").do(self.__create)
+        schedule.every().thursday.at("15:00").do(self.__create)
+        schedule.every().thursday.at("21:00").do(self.__create)
+
+        schedule.every().saturday.at("09:00").do(self.__create)
+        schedule.every().saturday.at("15:00").do(self.__create)
+        schedule.every().saturday.at("21:00").do(self.__create)
+
+        # schedule purge friends (600 removals max (monday), at 10PM)
+        schedule.every().monday.at("23:00").do(self.__purge)
+        schedule.every().wednesday.at("23:00").do(self.__purge)
+        schedule.every().friday.at("23:00").do(self.__purge)
 
         # schedule to post a tweet once a day (every day at 1PM)
         schedule.every().day.at("13:00").do(self.__tweet)
