@@ -121,17 +121,24 @@ class FriendshipService:
         # unfollow all those users
         for user_id in users_to_unfollow:
             self.__unfollow(user_id)
-            # unfollow once every five seconds
-            time.sleep(5)
+            # unfollow once every 30 seconds
+            time.sleep(30)
 
         # unfavourite all tweets
         favourites = self.__favourited_tweets()
-        logging.info(f'unliking {len(favourites)} tweets')
-        # unlike all favourited tweets
-        for tweet in favourites:
-            self.__unlike(tweet)
-            # unlike once every five seconds
-            time.sleep(5)
+        unfavourite_limit = 10
+        i = 0
+        while favourites or i <= unfavourite_limit:
+            logging.info(f'unliking {len(favourites)} tweets')
+            # unlike all favourited tweets
+            for tweet in favourites:
+                self.__unlike(tweet)
+                # unlike once every 30 seconds
+                time.sleep(30)
+            favourites = self.__favourited_tweets()
+            i = i+1
+            time.sleep(1)
+
         logging.info(f'purge completed')
 
     def __fetch_users(self, query):
