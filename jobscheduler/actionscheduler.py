@@ -72,9 +72,9 @@ class ActionScheduler:  # pylint: disable=too-few-public-methods
         schedule.every().saturday.at("21:00").do(self.__create)
 
         # schedule purge friends (600 removals max (monday), at 10PM)
-        schedule.every().monday.at("23:00").do(self.__purge)
-        schedule.every().wednesday.at("23:00").do(self.__purge)
-        schedule.every().friday.at("23:00").do(self.__purge)
+        schedule.every().monday.at("22:00").do(self.__purge)
+        schedule.every().wednesday.at("22:00").do(self.__purge)
+        schedule.every().friday.at("22:00").do(self.__purge)
 
         # schedule to post a tweet once a day (every day at 1PM)
         schedule.every().day.at("13:00").do(self.__tweet)
