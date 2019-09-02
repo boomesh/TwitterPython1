@@ -15,8 +15,9 @@ from static.logger import res_err
 import static.env
 
 SCREEN_NAME = os.getenv("auth_user_screen_name")
-UNFOLLOW_THROTTLE_SECONDS = 10
-UNLIKE_THROTTLE_SECONDS = 10
+FOLLOW_THROTTLE_SECONDS = 30
+UNFOLLOW_THROTTLE_SECONDS = 30
+UNLIKE_THROTTLE_SECONDS = 30
 
 
 class FriendshipService:
@@ -73,8 +74,8 @@ class FriendshipService:
         for user_id, tweet in user_tweet_map.items():
             self.__follow(user_id)
             self.__like(tweet)
-            # once every ten seconds
-            time.sleep(10)
+            # throttle
+            time.sleep(FOLLOW_THROTTLE_SECONDS)
 
     def purge(self):
         """
@@ -123,7 +124,7 @@ class FriendshipService:
         # unfollow all those users
         for user_id in users_to_unfollow:
             self.__unfollow(user_id)
-            # unfollow once every 10 seconds
+            # unfollow throttle
             time.sleep(UNFOLLOW_THROTTLE_SECONDS)
 
         # unfavourite all tweets
@@ -135,7 +136,7 @@ class FriendshipService:
             # unlike all favourited tweets
             for tweet in favourites:
                 self.__unlike(tweet)
-                # unlike once every 10 seconds
+                # unlike throttle
                 time.sleep(UNLIKE_THROTTLE_SECONDS)
             favourites = self.__favourited_tweets()
             i = i+1

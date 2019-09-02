@@ -54,7 +54,7 @@ class ActionScheduler:  # pylint: disable=too-few-public-methods
         Using this scheduler:
         https://schedule.readthedocs.io/en/stable/
         """
-        # schedule the friendships (100 friends max a day, 3 times a day)
+        # schedule the friendships (100 friends, 3 times a day)
         schedule.every().sunday.at("09:00").do(self.__create)
         schedule.every().sunday.at("15:00").do(self.__create)
         schedule.every().sunday.at("21:00").do(self.__create)
@@ -71,9 +71,9 @@ class ActionScheduler:  # pylint: disable=too-few-public-methods
         schedule.every().saturday.at("15:00").do(self.__create)
         schedule.every().saturday.at("21:00").do(self.__create)
 
-        # schedule purge friends (600 removals max, at 10PM)
+        # schedule purge friends (600 removals max)
         schedule.every().monday.at("02:00").do(self.__purge)
-        schedule.every().monday.at("22:00").do(self.__purge)
+        schedule.every().monday.at("18:30").do(self.__purge)
         schedule.every().wednesday.at("22:00").do(self.__purge)
         schedule.every().friday.at("22:00").do(self.__purge)
 
